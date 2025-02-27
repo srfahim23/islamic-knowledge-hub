@@ -1,10 +1,30 @@
-// This is a simple authentication system. In a real-world application,
-// you would use a more secure method, possibly with encryption and a database.
+import { db } from "./firebase"; // Firebase config import
+import { doc, getDoc } from "firebase/firestore"; // Firestore functions
 
-const ADMIN_USERNAME = "srfahim23"
-const ADMIN_PASSWORD = "1989132170"
+export async function authenticate(username: string, password: string): Promise<boolean> {
+  try {
+    // Firestore e `users` collection er moddhe username er document khujbo
+    const userRef = doc(db, "users", username); 
+    const userSnap = await getDoc(userRef);
 
-export function authenticate(username: string, password: string): boolean {
-  return username === ADMIN_USERNAME && password === ADMIN_PASSWORD
+    if (!userSnap.exists()) {
+      console.log("User not found!");
+      return false;
+    }
+
+    // User er stored data pabo
+    const userData = userSnap.data();
+    
+    // Password match korano
+    if (userData.password === password) {
+      console.log("Login successful!");
+      return true;
+    } else {
+      console.log("Incorrect password!");
+      return false;
+    }
+  } catch (error) {
+    console.error("Authentication error:", error);
+    return false;
+  }
 }
-
